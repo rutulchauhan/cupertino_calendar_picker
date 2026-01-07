@@ -16,6 +16,7 @@ class CalendarFooter extends StatefulWidget {
     required this.mainColor,
     required this.decoration,
     required this.use24hFormat,
+    this.locale,
     super.key,
   });
 
@@ -27,6 +28,7 @@ class CalendarFooter extends StatefulWidget {
   final Color mainColor;
   final CalendarFooterDecoration decoration;
   final bool? use24hFormat;
+  final String? locale;
 
   @override
   State<CalendarFooter> createState() => _CalendarFooterState();
@@ -119,10 +121,12 @@ class _CalendarFooterState extends State<CalendarFooter> {
                   ),
                   child: Text(
                     shouldShowDayPeriodSwitcher
-                        ? time.timeWithDayPeriodFormat(context)
+                        ? time.timeWithDayPeriodFormat(context,
+                            locale: widget.locale)
                         : time.timeFormat(
                             context,
                             use24hFormat: widget.use24hFormat,
+                            locale: widget.locale,
                           ),
                   ),
                 ),
@@ -144,7 +148,8 @@ class _CalendarFooterState extends State<CalendarFooter> {
                       height: 30.0,
                       child: Center(
                         child: Text(
-                          period.localizedString(context),
+                          period.localizedString(context,
+                              locale: widget.locale),
                           textAlign: TextAlign.center,
                           style: widget.decoration.dayPeriodTextStyle?.copyWith(
                             fontWeight:

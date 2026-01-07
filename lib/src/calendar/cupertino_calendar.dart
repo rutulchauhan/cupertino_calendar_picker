@@ -36,6 +36,7 @@ class CupertinoCalendar extends StatefulWidget {
     this.use24hFormat,
     this.firstDayOfWeekIndex,
     this.actions,
+    this.locale,
     super.key,
   }) {
     // ignore: prefer_asserts_in_initializer_lists
@@ -165,6 +166,9 @@ class CupertinoCalendar extends StatefulWidget {
   ///
   /// Displayed only when the calendar is in the [CupertinoCalendarType.compact] mode.
   final List<CupertinoCalendarAction>? actions;
+
+  /// The locale to use for the calendar.
+  final String? locale;
 
   @override
   State<CupertinoCalendar> createState() => _CupertinoCalendarState();
@@ -308,6 +312,7 @@ class _CupertinoCalendarState extends State<CupertinoCalendar> {
         minuteInterval: widget.minuteInterval,
         use24hFormat: widget.use24hFormat ?? context.alwaysUse24hFormat,
         actions: widget.actions,
+        locale: widget.locale,
       ),
     );
   }

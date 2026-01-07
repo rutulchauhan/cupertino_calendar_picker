@@ -8,8 +8,11 @@ library;
 import 'dart:math' as math;
 
 import 'package:cupertino_calendar_picker/src/utils/utils.dart';
+import 'package:cupertino_calendar_picker/src/extensions/day_period_extension.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 
 // Values derived from https://developer.apple.com/design/resources/ and on iOS
 // simulators with "Debug View Hierarchy".
@@ -284,6 +287,7 @@ class CustomCupertinoDatePicker extends StatefulWidget {
     this.showDayOfWeek = false,
     this.itemExtent = _kItemExtent,
     this.selectionOverlayBuilder,
+    this.locale,
   })  : initialDateTime = initialDateTime ?? DateTime.now(),
         assert(
           itemExtent > 0,
@@ -462,6 +466,7 @@ class CustomCupertinoDatePicker extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final SelectionOverlayBuilder? selectionOverlayBuilder;
+  final String? locale;
 
   @override
   State<StatefulWidget> createState() {
@@ -486,7 +491,8 @@ class CustomCupertinoDatePicker extends StatefulWidget {
     _PickerColumnType columnType,
     CupertinoLocalizations localizations,
     BuildContext context,
-    bool showDayOfWeek, {
+    bool showDayOfWeek,
+    String? locale, {
     bool standaloneMonth = false,
   }) {
     final List<String> longTexts = <String>[];
@@ -494,46 +500,68 @@ class CustomCupertinoDatePicker extends StatefulWidget {
     switch (columnType) {
       case _PickerColumnType.date:
         for (int i = 1; i <= 12; i++) {
-          final String date =
-              localizations.datePickerMediumDate(DateTime(2018, i, 25));
+          final String date = locale != null
+              ? DateFormat.MMMEd(locale).format(DateTime(2018, i, 25))
+              : localizations.datePickerMediumDate(DateTime(2018, i, 25));
           longTexts.add(date);
         }
       case _PickerColumnType.hour:
         for (int i = 0; i < 24; i++) {
-          final String hour = localizations.datePickerHour(i);
+          final String hour = locale != null
+              ? DateFormat.H(locale).format(DateTime(2018, 1, 1, i))
+              : localizations.datePickerHour(i);
           longTexts.add(hour);
         }
       case _PickerColumnType.minute:
         for (int i = 0; i < 60; i++) {
-          final String minute = localizations.datePickerMinute(i);
+          final String minute = locale != null
+              ? DateFormat.m(locale).format(DateTime(2018, 1, 1, 1, i))
+              : localizations.datePickerMinute(i);
           longTexts.add(minute);
         }
       case _PickerColumnType.dayPeriod:
-        longTexts.add(localizations.anteMeridiemAbbreviation);
-        longTexts.add(localizations.postMeridiemAbbreviation);
+        if (locale != null) {
+          longTexts.add(
+              DateFormat('a', locale).format(DateTime(2018, 1, 1, 10))); // AM
+          longTexts.add(
+              DateFormat('a', locale).format(DateTime(2018, 1, 1, 22))); // PM
+        } else {
+          longTexts.add(localizations.anteMeridiemAbbreviation);
+          longTexts.add(localizations.postMeridiemAbbreviation);
+        }
       case _PickerColumnType.dayOfMonth:
         int longestDayOfMonth = 1;
         for (int i = 1; i <= 31; i++) {
-          final String dayOfMonth = localizations.datePickerDayOfMonth(i);
+          final String dayOfMonth = locale != null
+              ? DateFormat.d(locale).format(DateTime(2018, 1, i))
+              : localizations.datePickerDayOfMonth(i);
           longTexts.add(dayOfMonth);
           longestDayOfMonth = i;
         }
         if (showDayOfWeek) {
           for (int wd = 1; wd < DateTime.daysPerWeek; wd++) {
-            final String dayOfMonth =
-                localizations.datePickerDayOfMonth(longestDayOfMonth, wd);
+            final String dayOfMonth = locale != null
+                ? DateFormat.E(locale).add_d().format(DateTime(2018, 1,
+                    longestDayOfMonth)) // Approximate, need better logic for day of week if year mismatch
+                : localizations.datePickerDayOfMonth(longestDayOfMonth, wd);
             longTexts.add(dayOfMonth);
           }
         }
       case _PickerColumnType.month:
         for (int i = 1; i <= 12; i++) {
-          final String month = standaloneMonth
-              ? localizations.datePickerStandaloneMonth(i)
-              : localizations.datePickerMonth(i);
+          final String month = locale != null
+              ? (standaloneMonth
+                  ? DateFormat.LLLL(locale).format(DateTime(2018, i))
+                  : DateFormat.MMMM(locale).format(DateTime(2018, i)))
+              : (standaloneMonth
+                  ? localizations.datePickerStandaloneMonth(i)
+                  : localizations.datePickerMonth(i));
           longTexts.add(month);
         }
       case _PickerColumnType.year:
-        longTexts.add(localizations.datePickerYear(2018));
+        longTexts.add(locale != null
+            ? DateFormat.y(locale).format(DateTime(2018))
+            : localizations.datePickerYear(2018));
     }
 
     assert(
@@ -763,6 +791,7 @@ class CustomCupertinoDatePickerDateTimeState
       localizations,
       context,
       widget.showDayOfWeek,
+      widget.locale,
     );
 
     return estimatedColumnWidths[columnType.index]!;
@@ -848,7 +877,9 @@ class CustomCupertinoDatePickerDateTimeState
             final String dateText =
                 rangeStart == DateTime(now.year, now.month, now.day)
                     ? localizations.todayLabel
-                    : localizations.datePickerMediumDate(rangeStart);
+                    : (widget.locale != null
+                        ? DateFormat.MMMEd(widget.locale).format(rangeStart)
+                        : localizations.datePickerMediumDate(rangeStart));
 
             return itemPositioningBuilder(
               context,
@@ -941,7 +972,13 @@ class CustomCupertinoDatePickerDateTimeState
             return itemPositioningBuilder(
               context,
               Text(
-                localizations.datePickerHour(displayHour),
+                widget.locale != null
+                    ? (widget.use24hFormat
+                        ? DateFormat('H', widget.locale)
+                            .format(DateTime(2018, 1, 1, hour))
+                        : DateFormat('h', widget.locale)
+                            .format(DateTime(2018, 1, 1, hour)))
+                    : localizations.datePickerHour(displayHour),
                 semanticsLabel:
                     localizations.datePickerHourSemanticsLabel(displayHour),
                 style: _themeTextStyle(
@@ -1004,7 +1041,10 @@ class CustomCupertinoDatePickerDateTimeState
             return itemPositioningBuilder(
               context,
               Text(
-                localizations.datePickerMinute(minute),
+                widget.locale != null
+                    ? DateFormat('mm', widget.locale)
+                        .format(DateTime(2018, 1, 1, 1, minute))
+                    : localizations.datePickerMinute(minute),
                 semanticsLabel:
                     localizations.datePickerMinuteSemanticsLabel(minute),
                 style: _themeTextStyle(context, isValid: !isInvalidMinute),
@@ -1053,8 +1093,10 @@ class CustomCupertinoDatePickerDateTimeState
               context,
               Text(
                 index == 0
-                    ? localizations.anteMeridiemAbbreviation
-                    : localizations.postMeridiemAbbreviation,
+                    ? DayPeriod.am
+                        .localizedString(context, locale: widget.locale)
+                    : DayPeriod.pm
+                        .localizedString(context, locale: widget.locale),
                 style: _themeTextStyle(
                   context,
                   isValid: _isValidHour(index, _selectedHourIndex),
@@ -1361,6 +1403,7 @@ class _CustomCupertinoDatePickerDateState
       localizations,
       context,
       widget.showDayOfWeek,
+      widget.locale,
     );
     estimatedColumnWidths[_PickerColumnType.month.index] =
         CustomCupertinoDatePicker._getColumnWidth(
@@ -1368,6 +1411,7 @@ class _CustomCupertinoDatePickerDateState
       localizations,
       context,
       widget.showDayOfWeek,
+      widget.locale,
     );
     estimatedColumnWidths[_PickerColumnType.year.index] =
         CustomCupertinoDatePicker._getColumnWidth(
@@ -1375,6 +1419,7 @@ class _CustomCupertinoDatePickerDateState
       localizations,
       context,
       widget.showDayOfWeek,
+      widget.locale,
     );
   }
 
@@ -1435,7 +1480,10 @@ class _CustomCupertinoDatePickerDateState
             return itemPositioningBuilder(
               context,
               Text(
-                localizations.datePickerDayOfMonth(day, dayOfWeek),
+                widget.locale != null
+                    ? DateFormat.d(widget.locale)
+                        .format(DateTime(selectedYear, selectedMonth, day))
+                    : localizations.datePickerDayOfMonth(day, dayOfWeek),
                 style: _themeTextStyle(context, isValid: !isInvalidDay),
               ),
             );
@@ -1488,10 +1536,15 @@ class _CustomCupertinoDatePickerDateState
                         widget.minimumDate!.month > month) ||
                     (widget.maximumDate?.year == selectedYear &&
                         widget.maximumDate!.month < month);
-            final String monthName =
-                (widget.mode == CupertinoDatePickerMode.monthYear)
+            final String monthName = widget.locale != null
+                ? (widget.mode == CupertinoDatePickerMode.monthYear
+                    ? DateFormat.LLLL(widget.locale)
+                        .format(DateTime(selectedYear, month))
+                    : DateFormat.MMMM(widget.locale)
+                        .format(DateTime(selectedYear, month)))
+                : ((widget.mode == CupertinoDatePickerMode.monthYear)
                     ? localizations.datePickerStandaloneMonth(month)
-                    : localizations.datePickerMonth(month);
+                    : localizations.datePickerMonth(month));
 
             return itemPositioningBuilder(
               context,
@@ -1556,7 +1609,9 @@ class _CustomCupertinoDatePickerDateState
             return itemPositioningBuilder(
               context,
               Text(
-                localizations.datePickerYear(year),
+                widget.locale != null
+                    ? DateFormat.y(widget.locale).format(DateTime(year))
+                    : localizations.datePickerYear(year),
                 style: _themeTextStyle(context, isValid: isValidYear),
               ),
             );
@@ -1852,6 +1907,7 @@ class _CustomCupertinoDatePickerMonthYearState
       localizations,
       context,
       false,
+      widget.locale,
       standaloneMonth: widget.mode == CupertinoDatePickerMode.monthYear,
     );
     estimatedColumnWidths[_PickerColumnType.year.index] =
@@ -1860,6 +1916,7 @@ class _CustomCupertinoDatePickerMonthYearState
       localizations,
       context,
       false,
+      widget.locale,
     );
   }
 
@@ -1904,10 +1961,15 @@ class _CustomCupertinoDatePickerMonthYearState
                         widget.minimumDate!.month > month) ||
                     (widget.maximumDate?.year == selectedYear &&
                         widget.maximumDate!.month < month);
-            final String monthName =
-                (widget.mode == CupertinoDatePickerMode.monthYear)
+            final String monthName = widget.locale != null
+                ? (widget.mode == CupertinoDatePickerMode.monthYear
+                    ? DateFormat.LLLL(widget.locale)
+                        .format(DateTime(selectedYear, month))
+                    : DateFormat.MMMM(widget.locale)
+                        .format(DateTime(selectedYear, month)))
+                : ((widget.mode == CupertinoDatePickerMode.monthYear)
                     ? localizations.datePickerStandaloneMonth(month)
-                    : localizations.datePickerMonth(month);
+                    : localizations.datePickerMonth(month));
 
             return itemPositioningBuilder(
               context,
@@ -1970,7 +2032,9 @@ class _CustomCupertinoDatePickerMonthYearState
             return itemPositioningBuilder(
               context,
               Text(
-                localizations.datePickerYear(year),
+                widget.locale != null
+                    ? DateFormat.y(widget.locale).format(DateTime(year))
+                    : localizations.datePickerYear(year),
                 style: _themeTextStyle(context, isValid: isValidYear),
               ),
             );

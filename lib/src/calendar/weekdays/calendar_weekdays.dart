@@ -10,11 +10,13 @@ class CalendarWeekdays extends StatelessWidget {
   const CalendarWeekdays({
     required this.decoration,
     required this.firstDayOfWeekIndex,
+    this.locale,
     super.key,
   });
 
   final CalendarWeekdayDecoration decoration;
   final int? firstDayOfWeekIndex;
+  final String? locale;
 
   List<Widget> _weekdays(BuildContext context) {
     final DateTime nowDate = DateTime.now();
@@ -34,7 +36,8 @@ class CalendarWeekdays extends StatelessWidget {
         context.textScaleFactor > calendarFormatChangeTextScaleFactor;
     return List<Widget>.generate(DateTime.daysPerWeek, (int index) {
       final DateTime date = firstDayOfWeekDate.addDays(index);
-      final String weekday = DateFormat.E(context.localeString).format(date);
+      final String weekday =
+          DateFormat.E(locale ?? context.localeString).format(date);
       final String formattedWeekday =
           isOneLetterWeekdayFormat ? weekday.characters.first : weekday;
 

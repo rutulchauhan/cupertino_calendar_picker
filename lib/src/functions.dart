@@ -136,37 +136,36 @@ import 'package:flutter/material.dart';
 /// A [Future] that resolves to the selected [DateTime] if a date was chosen, or `null`
 /// if the picker was dismissed without a selection.
 
-Future<DateTime?> showCupertinoCalendarPicker(
-  BuildContext context, {
-  required RenderBox? widgetRenderBox,
-  required DateTime minimumDateTime,
-  required DateTime maximumDateTime,
-  SelectableDayPredicate? selectableDayPredicate,
-  ValueChanged<DateTime>? onDateTimeChanged,
-  ValueChanged<DateTime>? onDateSelected,
-  DateTime? initialDateTime,
-  DateTime? currentDateTime,
-  ValueChanged<DateTime>? onDisplayedMonthChanged,
-  double horizontalSpacing = 15.0,
-  double verticalSpacing = 15.0,
-  Offset offset = const Offset(0.0, 10.0),
-  Color barrierColor = Colors.transparent,
-  Color mainColor = CupertinoColors.systemRed,
-  CalendarDismissBehavior dismissBehavior =
-      CalendarDismissBehavior.onOutsideTap,
-  PickerContainerDecoration? containerDecoration,
-  CalendarWeekdayDecoration? weekdayDecoration,
-  CalendarMonthPickerDecoration? monthPickerDecoration,
-  CalendarHeaderDecoration? headerDecoration,
-  CalendarFooterDecoration? footerDecoration,
-  CupertinoCalendarMode mode = CupertinoCalendarMode.date,
-  String? timeLabel,
-  int minuteInterval = 1,
-  bool? use24hFormat,
-  int? firstDayOfWeekIndex,
-  List<CupertinoCalendarAction>? actions,
-  bool useRootNavigator = true,
-}) {
+Future<DateTime?> showCupertinoCalendarPicker(BuildContext context,
+    {required RenderBox? widgetRenderBox,
+    required DateTime minimumDateTime,
+    required DateTime maximumDateTime,
+    SelectableDayPredicate? selectableDayPredicate,
+    ValueChanged<DateTime>? onDateTimeChanged,
+    ValueChanged<DateTime>? onDateSelected,
+    DateTime? initialDateTime,
+    DateTime? currentDateTime,
+    ValueChanged<DateTime>? onDisplayedMonthChanged,
+    double horizontalSpacing = 15.0,
+    double verticalSpacing = 15.0,
+    Offset offset = const Offset(0.0, 10.0),
+    Color barrierColor = Colors.transparent,
+    Color mainColor = CupertinoColors.systemRed,
+    CalendarDismissBehavior dismissBehavior =
+        CalendarDismissBehavior.onOutsideTap,
+    PickerContainerDecoration? containerDecoration,
+    CalendarWeekdayDecoration? weekdayDecoration,
+    CalendarMonthPickerDecoration? monthPickerDecoration,
+    CalendarHeaderDecoration? headerDecoration,
+    CalendarFooterDecoration? footerDecoration,
+    CupertinoCalendarMode mode = CupertinoCalendarMode.date,
+    String? timeLabel,
+    int minuteInterval = 1,
+    bool? use24hFormat,
+    int? firstDayOfWeekIndex,
+    List<CupertinoCalendarAction>? actions,
+    bool useRootNavigator = true,
+    String locale = 'en_US'}) {
   return showGeneralDialog<DateTime?>(
     context: context,
     barrierLabel: calendarPickerBarrierLabel,
@@ -213,6 +212,7 @@ Future<DateTime?> showCupertinoCalendarPicker(
         use24hFormat: use24hFormat ?? context.alwaysUse24hFormat,
         firstDayOfWeekIndex: firstDayOfWeekIndex,
         actions: actions,
+        locale: locale,
       );
     },
   );
@@ -306,6 +306,7 @@ Future<TimeOfDay?> showCupertinoTimePicker(
   int minuteInterval = 1,
   bool? use24hFormat,
   bool useRootNavigator = true,
+  String? locale,
 }) {
   return showGeneralDialog<TimeOfDay?>(
     context: context,
@@ -339,6 +340,7 @@ Future<TimeOfDay?> showCupertinoTimePicker(
         onTimeChanged: onTimeChanged,
         minuteInterval: minuteInterval,
         use24hFormat: use24hFormat ?? context.alwaysUse24hFormat,
+        locale: locale,
       );
     },
   );

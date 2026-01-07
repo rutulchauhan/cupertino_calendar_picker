@@ -35,16 +35,17 @@ extension TimeOfDayExtension on TimeOfDay {
     }
   }
 
-  String timeWithDayPeriodFormat(BuildContext context) {
-    return DateFormat('h:mm').format(toDateTime());
+  String timeWithDayPeriodFormat(BuildContext context, {String? locale}) {
+    return DateFormat('h:mm', locale).format(toDateTime());
   }
 
   String timeFormat(
     BuildContext context, {
     required bool? use24hFormat,
+    String? locale,
   }) {
     final bool use24HoursFormat = use24hFormat ?? context.alwaysUse24hFormat;
     final String pattern = use24HoursFormat ? 'HH:mm' : 'h:mm a';
-    return DateFormat(pattern).format(toDateTime());
+    return DateFormat(pattern, locale).format(toDateTime());
   }
 }

@@ -4,3 +4,4 @@
 
 export 'package_date_utils.dart';
 export 'scroll_utils.dart';
+export 'locale_utils.dart';

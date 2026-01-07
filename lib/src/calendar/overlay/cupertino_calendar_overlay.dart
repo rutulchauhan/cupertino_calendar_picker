@@ -33,6 +33,7 @@ class CupertinoCalendarOverlay extends StatefulWidget {
     this.headerDecoration,
     this.footerDecoration,
     this.timeLabel,
+    this.locale,
   });
 
   final double horizontalSpacing;
@@ -60,6 +61,7 @@ class CupertinoCalendarOverlay extends StatefulWidget {
   final bool use24hFormat;
   final int? firstDayOfWeekIndex;
   final List<CupertinoCalendarAction>? actions;
+  final String? locale;
 
   @override
   State<CupertinoCalendarOverlay> createState() =>
@@ -149,6 +151,7 @@ class _CupertinoCalendarOverlayState extends State<CupertinoCalendarOverlay> {
         use24hFormat: widget.use24hFormat,
         firstDayOfWeekIndex: widget.firstDayOfWeekIndex,
         actions: widget.actions,
+        locale: widget.locale,
       ),
     );
   }

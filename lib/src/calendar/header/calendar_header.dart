@@ -15,6 +15,7 @@ class CalendarHeader extends StatefulWidget {
     required this.onPreviousMonthIconTapped,
     required this.onNextMonthIconTapped,
     required this.decoration,
+    this.locale,
     super.key,
   });
 
@@ -23,6 +24,7 @@ class CalendarHeader extends StatefulWidget {
   final VoidCallback? onNextMonthIconTapped;
   final YearPickerCallback onYearPickerStateChanged;
   final CalendarHeaderDecoration decoration;
+  final String? locale;
 
   @override
   State<CalendarHeader> createState() => _CalendarHeaderState();
@@ -45,7 +47,8 @@ class _CalendarHeaderState extends State<CalendarHeader> {
   @override
   Widget build(BuildContext context) {
     final DateTime date = widget.currentMonth;
-    final String headerString = DateFormat.yMMMM(context.localeString).format(
+    final String headerString =
+        DateFormat.yMMMM(widget.locale ?? context.localeString).format(
       date,
     );
 
